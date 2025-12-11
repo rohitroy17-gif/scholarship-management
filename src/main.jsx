@@ -12,23 +12,34 @@ import Register from "./Register";
 import AllScholarships from "./AllScholarships";
 import ScholarshipDetails from "./ScholarshipDetails";
 
-import App, { AdminRoute, ModeratorRoute, UserRoute } from "./App";
+import App, { AdminRoute, ModeratorRoute, UserRoute, PrivateRoute } from "./App";
 
+// Admin pages
 import AdminMyProfile from "./AdminMyProfile";
 import AddScholarship from "./AddScholarship";
 import ManageScholarships from "./ManageScholarships";
 import ManageUsers from "./ManageUsers";
 import Analytics from "./Analytics";
 
+// Moderator pages
 import ModeratorPanel from "./ModeratorPanel";
 import AllReviews from "./AllReviews";
 
+// User pages
 import ApplicationDetailsPage from "./ApplicationDetailsPage";
 import AddReviewPage from "./AddReviewPage";
 import EditReviewPage from "./EditReviewPage";
 
+// Stripe pages (top-level private routes)
+import Checkout from "./Checkout";
+import PaymentSuccess from "./PaymentSuccess";
+import PaymentFailed from "./PaymentFailed";
+
 import "./index.css";
 
+// -----------------------------------------------------------
+// ROUTER CONFIG
+// -----------------------------------------------------------
 const router = createBrowserRouter([
   {
     path: "/",
@@ -40,14 +51,43 @@ const router = createBrowserRouter([
       { path: "scholarships", element: <AllScholarships /> },
       { path: "scholarship/:id", element: <ScholarshipDetails /> },
 
+      // ------------------- STRIPE ROUTES (top-level) -------------------
+      {
+        path: "checkout/:id",
+        element: (
+          <PrivateRoute>
+            <Checkout />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "payment-success/:appId",
+        element: (
+          <PrivateRoute>
+            <PaymentSuccess />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "payment-failed/:appId",
+        element: (
+          <PrivateRoute>
+            <PaymentFailed />
+          </PrivateRoute>
+        ),
+      },
+
+      // ------------------- DASHBOARD -------------------
       {
         path: "dashboard",
         element: <App />,
         children: [
           { index: true, element: <Navigate to="profile" replace /> },
+
+          // Profile
           { path: "profile", element: <AdminMyProfile /> },
 
-          // ADMIN
+          // ------------------- ADMIN -------------------
           {
             path: "add-scholarship",
             element: (
@@ -81,7 +121,7 @@ const router = createBrowserRouter([
             ),
           },
 
-          // MODERATOR
+          // ------------------- MODERATOR -------------------
           {
             path: "moderator",
             element: (
@@ -96,7 +136,7 @@ const router = createBrowserRouter([
             ],
           },
 
-          // USER ROUTES (FIXED)
+          // ------------------- USER -------------------
           {
             path: "user",
             element: (
@@ -106,6 +146,7 @@ const router = createBrowserRouter([
             ),
             children: [
               { path: "application-details", element: <ApplicationDetailsPage /> },
+              { path: "applications", element: <ApplicationDetailsPage /> }, 
               { path: "add-reviews", element: <AddReviewPage /> },
               { path: "edit-reviews", element: <EditReviewPage /> },
               { index: true, element: <Navigate to="application-details" replace /> },
@@ -117,6 +158,9 @@ const router = createBrowserRouter([
   },
 ]);
 
+// -----------------------------------------------------------
+// RENDER
+// -----------------------------------------------------------
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthProvider>
@@ -124,6 +168,13 @@ createRoot(document.getElementById("root")).render(
     </AuthProvider>
   </React.StrictMode>
 );
+
+export default router;
+
+
+
+
+
 
 
 
