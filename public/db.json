@@ -1,0 +1,25 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Student User",
+      "email": "roy459319@gmail.com",
+      "password": "123457",
+      "role": "student"
+    },
+    {
+      "id": 2,
+      "name": "Admin User",
+      "email": "rr2792383@gmail.com",
+      "password": "admin123",
+      "role": "admin"
+    },
+    {
+      "id": 3,
+      "name": "Moderator User",
+      "email": "roy172758@gmail.com",
+      "password": "mod123",
+      "role": "moderator"
+    }
+  ]
+}
