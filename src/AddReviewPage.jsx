@@ -2,13 +2,16 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
+import { toast } from "react-toastify";
 
 const AddReviewPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+
   const [application, setApplication] = useState(null);
-  const [reviewText, setReviewText] = useState("");
+  const [comment, setComment] = useState("");
+  const [rating, setRating] = useState(5);
 
   // Get appId from query params
   const queryParams = new URLSearchParams(location.search);
@@ -35,6 +38,7 @@ const AddReviewPage = () => {
         }
       } catch (err) {
         console.error("Failed to fetch application:", err);
+        toast.error("Failed to fetch application");
       }
     };
 
@@ -45,7 +49,7 @@ const AddReviewPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!application) return alert("No application selected!");
+    if (!application) return toast.error("❌ No application selected");
 
     try {
       const res = await fetch("http://localhost:3000/reviews", {
@@ -55,21 +59,27 @@ const AddReviewPage = () => {
           applicationId: application._id,
           scholarshipId: application.scholarshipId,
           userId: user.email,
-          review: reviewText,
+          reviewerName: user.name,
+          comment, // <-- review text
+          rating,  // <-- numeric rating
           date: new Date(),
         }),
       });
 
       const data = await res.json();
-      alert("✅ Review added!");
-      navigate("/dashboard/user/application-details"); // redirect to application details
+      if (data?.id || data?._id) {
+        toast.success("✅ Review added successfully!");
+        navigate("/dashboard/user/application-details");
+      } else {
+        toast.error("❌ Failed to add review");
+      }
     } catch (err) {
       console.error("Failed to add review:", err);
-      alert("❌ Failed to add review");
+      toast.error("❌ Failed to add review");
     }
   };
 
-  if (!application) return <p>❌ No application selected</p>;
+  if (!application) return <p className="text-red-500">❌ No application selected</p>;
 
   return (
     <div className="max-w-3xl mx-auto mt-10 p-6 border rounded shadow">
@@ -78,14 +88,27 @@ const AddReviewPage = () => {
       <p><b>University:</b> {application.universityName}</p>
 
       <form onSubmit={handleSubmit} className="mt-4">
+        <label className="block mb-2 font-semibold">Your Review:</label>
         <textarea
-          value={reviewText}
-          onChange={(e) => setReviewText(e.target.value)}
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
           placeholder="Write your review..."
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded mb-4"
           rows={5}
           required
         />
+
+        <label className="block mb-2 font-semibold">Rating (1-5):</label>
+        <input
+          type="number"
+          min="1"
+          max="5"
+          value={rating}
+          onChange={(e) => setRating(Number(e.target.value))}
+          className="w-20 p-2 border rounded mb-4"
+          required
+        />
+
         <button
           type="submit"
           className="mt-4 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
@@ -98,4 +121,5 @@ const AddReviewPage = () => {
 };
 
 export default AddReviewPage;
+
 

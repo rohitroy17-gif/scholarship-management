@@ -24,17 +24,20 @@ const AddScholarship = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       const res = await fetch("http://localhost:3000/scholarships", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form)
+        body: JSON.stringify(form),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to add");
-      toast.success("Scholarship added");
-      // clear
+      if (!res.ok) throw new Error(data.message || "Failed to add scholarship");
+
+      toast.success("✅ Scholarship added successfully!");
+
+      // Clear the form
       setForm({
         scholarshipName: "",
         universityName: "",
@@ -52,15 +55,17 @@ const AddScholarship = () => {
         scholarshipPostDate: "",
         postedUserEmail: ""
       });
+
     } catch (err) {
       console.error(err);
-      toast.error(err.message || "Error");
+      toast.error(err.message || "❌ Failed to add scholarship");
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto bg-white p-6 rounded shadow">
+    <div className="max-w-3xl mx-auto bg-white p-6 rounded shadow mt-6">
       <h2 className="text-2xl font-bold mb-4">Add Scholarship</h2>
+
       <form className="grid grid-cols-1 md:grid-cols-2 gap-3" onSubmit={handleSubmit}>
         <input name="scholarshipName" value={form.scholarshipName} onChange={handleChange} placeholder="Scholarship Name" required className="p-2 border rounded" />
         <input name="universityName" value={form.universityName} onChange={handleChange} placeholder="University Name" required className="p-2 border rounded" />
@@ -77,8 +82,12 @@ const AddScholarship = () => {
         <input name="applicationDeadline" value={form.applicationDeadline} onChange={handleChange} placeholder="Application Deadline (YYYY-MM-DD)" className="p-2 border rounded" />
         <input name="scholarshipPostDate" value={form.scholarshipPostDate} onChange={handleChange} placeholder="Post Date (YYYY-MM-DD)" className="p-2 border rounded" />
         <input name="postedUserEmail" value={form.postedUserEmail} onChange={handleChange} placeholder="Your email" className="p-2 border rounded" />
+        
         <div className="md:col-span-2 text-right">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded">Add Scholarship</button>
+          {/* Important: type="submit" */}
+          <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            Add Scholarship
+          </button>
         </div>
       </form>
     </div>
@@ -86,4 +95,5 @@ const AddScholarship = () => {
 };
 
 export default AddScholarship;
+
 
