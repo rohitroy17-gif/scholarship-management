@@ -1,168 +1,173 @@
 import React, { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
-  const [filter, setFilter] = useState(""); // user/moderator/admin
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("");
 
-  // Fetch users from backend
+  // Fetch users from server
   const fetchUsers = async () => {
     try {
-      const url = filter
-        ? `http://localhost:3000/users?role=${filter}`
-        : "http://localhost:3000/users";
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to fetch users");
-      const data = await res.json();
-      setUsers(data);
+      setLoading(true);
+      const res = await axios.get("http://localhost:3000/users");
+      setUsers(res.data);
+      setLoading(false);
     } catch (err) {
       console.error(err);
-      toast.error(err.message || "Failed to load users");
+      toast.error("Failed to fetch users");
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchUsers();
-  }, [filter]);
+  }, []);
 
-  // Change user role (promote/demote)
-  const changeRole = async (id, newRole) => {
-    if (!window.confirm(`Are you sure you want to change this user to ${newRole}?`)) return;
+  // Change user role
+  const changeRole = async (id, role) => {
     try {
-      const res = await fetch(`http://localhost:3000/users/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: newRole }),
-      });
-      if (!res.ok) throw new Error("Failed to update role");
-      toast.success(`User role updated to ${newRole}`);
-      fetchUsers();
+      const res = await axios.patch(
+        `http://localhost:3000/users/${id}`,
+        { role },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      if (res.data.success) {
+        toast.success("Role updated successfully!");
+        fetchUsers(); // refresh users from server
+      }
     } catch (err) {
       console.error(err);
-      toast.error(err.message || "Error updating role");
+      toast.error("Failed to update role");
     }
   };
 
   // Delete user
   const deleteUser = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
-      const res = await fetch(`http://localhost:3000/users/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete user");
-      toast.success("User deleted successfully");
-      fetchUsers();
+      const res = await axios.delete(`http://localhost:3000/users/${id}`);
+      if (res.data.success) {
+        toast.success("User deleted successfully");
+        fetchUsers();
+      } else {
+        toast.error(res.data.message || "Failed to delete user");
+      }
     } catch (err) {
       console.error(err);
-      toast.error(err.message || "Error deleting user");
+      toast.error("Failed to delete user");
     }
   };
 
+  const filteredUsers = filter
+    ? users.filter((u) => u.role === filter)
+    : users;
+
+  if (loading) return <p className="text-center mt-10">Loading users...</p>;
+
   return (
-    <div className="bg-white p-6 rounded shadow max-w-6xl mx-auto mt-6">
+    <div className="max-w-6xl mx-auto mt-6 p-4 bg-white rounded shadow">
       <h2 className="text-2xl font-bold mb-4">Manage Users</h2>
 
-      <div className="flex items-center gap-3 mb-4">
-        <label className="font-semibold">Filter by role:</label>
+      {/* Filter */}
+      <div className="mb-4 flex items-center gap-3">
+        <label className="font-medium">Filter by role:</label>
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="border p-2 rounded"
+          className="border rounded p-2"
         >
           <option value="">All</option>
-          <option value="user">User</option>
+          <option value="student">Student</option>
           <option value="moderator">Moderator</option>
           <option value="admin">Admin</option>
         </select>
       </div>
 
-      <table className="w-full border-collapse border">
-        <thead className="bg-gray-200">
-          <tr>
-            <th className="border p-2">Name</th>
-            <th className="border p-2">Email</th>
-            <th className="border p-2">Role</th>
-            <th className="border p-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.length === 0 ? (
-            <tr>
-              <td colSpan="4" className="text-center py-4">
-                No users found
-              </td>
-            </tr>
-          ) : (
-            users.map((user) => (
-              <tr key={user._id} className="hover:bg-gray-50">
-                <td className="border p-2">{user.name}</td>
-                <td className="border p-2">{user.email}</td>
-                <td className="border p-2 capitalize">{user.role}</td>
-                <td className="border p-2 space-x-2">
-                  {/* Role actions */}
-                  {user.role === "user" && (
-                    <>
+      {/* Users table */}
+      {filteredUsers.length === 0 ? (
+        <p>No users found.</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full border border-gray-200">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-2 border">Name</th>
+                <th className="p-2 border">Email</th>
+                <th className="p-2 border">Role</th>
+                <th className="p-2 border">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers.map((u) => (
+                <tr key={u._id} className="hover:bg-gray-50">
+                  <td className="p-2 border">{u.name}</td>
+                  <td className="p-2 border">{u.email}</td>
+                  <td className="p-2 border">{u.role}</td>
+                  <td className="p-2 border flex flex-wrap gap-2">
+                    {u.role !== "moderator" && (
                       <button
-                        onClick={() => changeRole(user._id, "moderator")}
-                        className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                        onClick={() => changeRole(u._id, "moderator")}
+                        className="bg-green-500 text-white px-3 py-1 rounded"
                       >
                         Promote to Moderator
                       </button>
+                    )}
+                    {u.role !== "admin" && (
                       <button
-                        onClick={() => changeRole(user._id, "admin")}
-                        className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                        onClick={() => changeRole(u._id, "admin")}
+                        className="bg-indigo-600 text-white px-3 py-1 rounded"
                       >
                         Promote to Admin
                       </button>
-                    </>
-                  )}
-                  {user.role === "moderator" && (
-                    <>
+                    )}
+                    {u.role !== "student" && (
                       <button
-                        onClick={() => changeRole(user._id, "user")}
-                        className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                        onClick={() => changeRole(u._id, "student")}
+                        className="bg-yellow-500 text-white px-3 py-1 rounded"
                       >
-                        Demote to User
+                        Demote to Student
                       </button>
-                      <button
-                        onClick={() => changeRole(user._id, "admin")}
-                        className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-                      >
-                        Promote to Admin
-                      </button>
-                    </>
-                  )}
-                  {user.role === "admin" && (
-                    <>
-                      <button
-                        onClick={() => changeRole(user._id, "moderator")}
-                        className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-                      >
-                        Demote to Moderator
-                      </button>
-                      <button
-                        onClick={() => changeRole(user._id, "user")}
-                        className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                      >
-                        Demote to User
-                      </button>
-                    </>
-                  )}
-                  <button
-                    onClick={() => deleteUser(user._id)}
-                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+                    )}
+                    <button
+                      onClick={() => deleteUser(u._id)}
+                      className="bg-red-600 text-white px-3 py-1 rounded"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
     </div>
   );
 };
 
 export default ManageUsers;
+
+
+
+
+
+
+
+
+
 
 

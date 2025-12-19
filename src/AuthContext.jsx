@@ -1,5 +1,5 @@
-// src/AuthContext.jsx
 import React, { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
 import defaultAdmin from "./assets/default-admin.png";
 
 const AuthContext = createContext(null);
@@ -11,13 +11,11 @@ export const AuthProvider = ({ children }) => {
 
   // ------------------- LOAD USERS & LOCAL STORAGE -------------------
   useEffect(() => {
-    // Load users from db.json (frontend JSON)
     fetch("/db.json")
       .then((res) => res.json())
       .then((data) => setDbUsers(data.users || []))
       .catch(console.error);
 
-    // Check localStorage for logged-in user
     const stored = localStorage.getItem("scholar_user");
     if (stored) {
       const parsed = JSON.parse(stored);
@@ -27,9 +25,24 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // ------------------- LOGIN (EMAIL/PASSWORD) -------------------
-  const login = (email, password) => {
-    // If email/password passed, check db.json
+  // ------------------- SYNC USER TO BACKEND -------------------
+  const saveUserToBackend = async (userObj) => {
+    try {
+      await axios.post("http://localhost:3000/register", {
+        name: userObj.name || userObj.displayName || "Unknown",
+        email: userObj.email,
+        photo: userObj.photoURL || defaultAdmin,
+      });
+    } catch (err) {
+      // Duplicate user - ignore
+    }
+  };
+
+  // ------------------- LOGIN (EMAIL/PASSWORD OR GOOGLE) -------------------
+  const login = async (email, password) => {
+    let userObj = null;
+
+    // Email/password login
     if (email && password) {
       const matched = dbUsers.find(
         (u) => u.email === email && u.password === password
@@ -38,20 +51,25 @@ export const AuthProvider = ({ children }) => {
       if (!matched) throw new Error("Invalid email or password");
 
       if (!matched.photoURL) matched.photoURL = defaultAdmin;
-      setUser(matched);
-      localStorage.setItem("scholar_user", JSON.stringify(matched));
-      return matched;
+
+      userObj = matched;
     }
-    // Otherwise, login can accept a full user object (for Google login)
-    if (typeof email === "object" && email !== null) {
-      const userObj = email;
+    // Google login (we receive full object)
+    else if (typeof email === "object" && email !== null) {
+      userObj = email;
       if (!userObj.photoURL) userObj.photoURL = defaultAdmin;
-      setUser(userObj);
-      localStorage.setItem("scholar_user", JSON.stringify(userObj));
-      return userObj;
+    } else {
+      throw new Error("Login failed");
     }
 
-    throw new Error("Login failed");
+    // Save to state + localStorage
+    setUser(userObj);
+    localStorage.setItem("scholar_user", JSON.stringify(userObj));
+
+    // ⭐ Sync user to backend database
+    await saveUserToBackend(userObj);
+
+    return userObj;
   };
 
   // ------------------- LOGOUT -------------------
@@ -67,12 +85,12 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// ------------------- CUSTOM HOOK -------------------
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth must be used inside <AuthProvider>");
   return context;
 };
+
 
 
 

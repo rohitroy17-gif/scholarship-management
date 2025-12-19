@@ -12,6 +12,7 @@ import {
 const Analytics = () => {
   const [scholarships, setScholarships] = useState([]);
   const [applications, setApplications] = useState([]);
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
     fetch("http://localhost:3000/scholarships")
@@ -23,21 +24,28 @@ const Analytics = () => {
       .then((r) => r.json())
       .then(setApplications)
       .catch(console.error);
+
+    fetch("http://localhost:3000/users")
+      .then((r) => r.json())
+      .then(setUsers)
+      .catch(console.error);
   }, []);
 
-  const totalUsers = 0; // replace with actual /users fetch if needed
+  const totalUsers = users.length;
   const totalScholarships = scholarships.length;
+
+  // FIXED: Sum all amounts safely regardless of payment status
   const totalFeesCollected = applications.reduce(
-    (acc, a) =>
-      acc +
-      (a.paymentStatus === "paid" ? (a.applicationFees || 0) + (a.serviceCharge || 0) : 0),
+    (acc, a) => acc + ((a.amount || 0) + (a.serviceCharge || 0)),
     0
   );
 
-  // compute application counts per university
+  // Application counts per university
   const countsMap = {};
   applications.forEach((a) => {
-    countsMap[a.universityName] = (countsMap[a.universityName] || 0) + 1;
+    if (a.universityName) {
+      countsMap[a.universityName] = (countsMap[a.universityName] || 0) + 1;
+    }
   });
   const chartData = Object.entries(countsMap).map(([name, count]) => ({ name, count }));
 
@@ -76,3 +84,8 @@ const Analytics = () => {
 };
 
 export default Analytics;
+
+
+
+
+
