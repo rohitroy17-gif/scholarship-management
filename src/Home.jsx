@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router";
 import ContactForm from "./ContactForm";
-
+//homepage
 const HomePage = () => {
   const [scholarships, setScholarships] = useState([]);
   const navigate = useNavigate();
