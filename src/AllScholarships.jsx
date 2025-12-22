@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { motion } from "framer-motion";
 
 /* ================= ANIMATIONS ================= */
-
+//allscholarship
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
