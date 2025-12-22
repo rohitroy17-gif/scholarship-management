@@ -9,6 +9,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+
+//analytics
 const Analytics = () => {
   const [scholarships, setScholarships] = useState([]);
   const [applications, setApplications] = useState([]);
