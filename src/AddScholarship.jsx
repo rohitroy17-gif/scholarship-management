@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-
+//addscholarship
 const AddScholarship = () => {
   const [form, setForm] = useState({
     scholarshipName: "",
