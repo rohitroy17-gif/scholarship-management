@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import defaultAdmin from "./assets/default-admin.png";
-
+//authcontext
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
