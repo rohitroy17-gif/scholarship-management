@@ -9,7 +9,7 @@ import {
   signOut,
   updateProfile
 } from "firebase/auth";
-
+//authprovder
 export const AuthContext = createContext();
 const googleProvider = new GoogleAuthProvider();
 
