@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
   // ------------------- SYNC USER TO BACKEND -------------------
   const saveUserToBackend = async (userObj) => {
     try {
-      await axios.post("http://localhost:3000/register", {
+      await axios.post("https://my-scholarship-server.vercel.app/register", {
         name: userObj.name || userObj.displayName || "Unknown",
         email: userObj.email,
         photo: userObj.photoURL || defaultAdmin,

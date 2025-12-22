@@ -6,7 +6,7 @@ const ManageApplications = () => {
   const [feedbackText, setFeedbackText] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:3000/applications")
+    fetch("https://my-scholarship-server.vercel.app/applications")
       .then(res => res.json())
       .then(setApplications)
       .catch(console.error);
@@ -14,7 +14,7 @@ const ManageApplications = () => {
 
   // Update status (processing / completed / rejected)
   const updateStatus = async (id, newStatus) => {
-    const res = await fetch(`http://localhost:3000/applications/${id}`, {
+    const res = await fetch(`https://my-scholarship-server.vercel.app/applications/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ applicationStatus: newStatus }),
@@ -29,7 +29,7 @@ const ManageApplications = () => {
 
   // Save feedback
   const saveFeedback = async (id) => {
-    const res = await fetch(`http://localhost:3000/applications/${id}`, {
+    const res = await fetch(`https://my-scholarship-server.vercel.app/applications/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ feedback: feedbackText }),

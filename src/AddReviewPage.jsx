@@ -1,4 +1,3 @@
-// src/AddReviewPage.jsx
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
@@ -12,6 +11,7 @@ const AddReviewPage = () => {
   const [application, setApplication] = useState(null);
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(5);
+  const [loading, setLoading] = useState(true);
 
   // Get appId from query params
   const queryParams = new URLSearchParams(location.search);
@@ -22,14 +22,14 @@ const AddReviewPage = () => {
       try {
         let url;
         if (appId) {
-          // Fetch specific application
-          url = `http://localhost:3000/applications/${appId}`;
+          url = `https://my-scholarship-server.vercel.app/applications/${appId}`;
           const res = await fetch(url);
           const data = await res.json();
           setApplication(data);
         } else {
-          // Fetch latest application of the logged-in user
-          url = `http://localhost:3000/applications?userEmail=${encodeURIComponent(user.email)}`;
+          url = `https://my-scholarship-server.vercel.app/applications?userEmail=${encodeURIComponent(
+            user.email
+          )}`;
           const res = await fetch(url);
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
@@ -38,13 +38,13 @@ const AddReviewPage = () => {
         }
       } catch (err) {
         console.error("Failed to fetch application:", err);
-        toast.error("Failed to fetch application");
+        toast.error("❌ Failed to fetch application");
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (user?.email) {
-      fetchApplication();
-    }
+    if (user?.email) fetchApplication();
   }, [appId, user]);
 
   const handleSubmit = async (e) => {
@@ -52,7 +52,7 @@ const AddReviewPage = () => {
     if (!application) return toast.error("❌ No application selected");
 
     try {
-      const res = await fetch("http://localhost:3000/reviews", {
+      const res = await fetch("https://my-scholarship-server.vercel.app/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -60,14 +60,14 @@ const AddReviewPage = () => {
           scholarshipId: application.scholarshipId,
           userId: user.email,
           reviewerName: user.name,
-          comment, // <-- review text
-          rating,  // <-- numeric rating
+          comment,
+          rating,
           date: new Date(),
         }),
       });
 
       const data = await res.json();
-      if (data?.id || data?._id) {
+      if (data?._id || data?.id) {
         toast.success("✅ Review added successfully!");
         navigate("/dashboard/user/application-details");
       } else {
@@ -79,39 +79,64 @@ const AddReviewPage = () => {
     }
   };
 
-  if (!application) return <p className="text-red-500">❌ No application selected</p>;
+  if (loading)
+    return (
+      <div className="flex justify-center mt-20">
+        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+
+  if (!application)
+    return (
+      <p className="text-center mt-10 text-red-500">
+        ❌ No application selected
+      </p>
+    );
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 p-6 border rounded shadow">
-      <h2 className="text-2xl font-bold mb-4">Add Review</h2>
-      <p><b>Scholarship:</b> {application.scholarshipName}</p>
-      <p><b>University:</b> {application.universityName}</p>
+    <div className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded-2xl shadow-lg">
+      <h2 className="text-3xl font-bold mb-6 text-center">Add Review</h2>
 
-      <form onSubmit={handleSubmit} className="mt-4">
-        <label className="block mb-2 font-semibold">Your Review:</label>
-        <textarea
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          placeholder="Write your review..."
-          className="w-full p-2 border rounded mb-4"
-          rows={5}
-          required
-        />
+      <div className="mb-6 space-y-1">
+        <p>
+          <span className="font-semibold">Scholarship:</span>{" "}
+          {application.scholarshipName}
+        </p>
+        <p>
+          <span className="font-semibold">University:</span>{" "}
+          {application.universityName}
+        </p>
+      </div>
 
-        <label className="block mb-2 font-semibold">Rating (1-5):</label>
-        <input
-          type="number"
-          min="1"
-          max="5"
-          value={rating}
-          onChange={(e) => setRating(Number(e.target.value))}
-          className="w-20 p-2 border rounded mb-4"
-          required
-        />
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block mb-2 font-semibold">Your Review:</label>
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Write your review..."
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+            rows={5}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block mb-2 font-semibold">Rating (1-5):</label>
+          <input
+            type="number"
+            min="1"
+            max="5"
+            value={rating}
+            onChange={(e) => setRating(Number(e.target.value))}
+            className="w-24 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            required
+          />
+        </div>
 
         <button
           type="submit"
-          className="mt-4 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg hover:opacity-90 transition"
         >
           Submit Review
         </button>
@@ -121,5 +146,6 @@ const AddReviewPage = () => {
 };
 
 export default AddReviewPage;
+
 
 

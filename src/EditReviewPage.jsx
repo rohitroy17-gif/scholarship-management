@@ -1,7 +1,7 @@
-// src/EditReviewPage.jsx
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
+import { toast } from "react-toastify";
 
 const EditReviewPage = () => {
   const location = useLocation();
@@ -10,6 +10,7 @@ const EditReviewPage = () => {
 
   const [review, setReview] = useState(null);
   const [reviewText, setReviewText] = useState("");
+  const [loading, setLoading] = useState(true);
 
   // Get reviewId from query params
   const queryParams = new URLSearchParams(location.search);
@@ -21,33 +22,42 @@ const EditReviewPage = () => {
         let url;
 
         if (reviewId) {
-          // Fetch specific review
-          url = `http://localhost:3000/reviews/${reviewId}`;
+          url = `https://my-scholarship-server.vercel.app/reviews/${reviewId}`;
           const res = await fetch(url);
           const data = await res.json();
           setReview(data);
-          setReviewText(data.review);
+          setReviewText(data.comment || "");
         } else {
-          // Fetch latest review of the user's latest application
-          const appsRes = await fetch(`http://localhost:3000/applications?userEmail=${encodeURIComponent(user.email)}`);
+          // Fetch latest review from latest application
+          const appsRes = await fetch(
+            `https://my-scholarship-server.vercel.app/applications?userEmail=${encodeURIComponent(
+              user.email
+            )}`
+          );
           const appsData = await appsRes.json();
 
           if (Array.isArray(appsData) && appsData.length > 0) {
             const latestApp = appsData[appsData.length - 1];
 
-            // fetch latest review for this application
-            const reviewsRes = await fetch(`http://localhost:3000/reviews?applicationId=${latestApp._id}&userId=${encodeURIComponent(user.email)}`);
+            const reviewsRes = await fetch(
+              `https://my-scholarship-server.vercel.app/reviews?applicationId=${latestApp._id}&userId=${encodeURIComponent(
+                user.email
+              )}`
+            );
             const reviewsData = await reviewsRes.json();
 
             if (Array.isArray(reviewsData) && reviewsData.length > 0) {
               const latestReview = reviewsData[reviewsData.length - 1];
               setReview(latestReview);
-              setReviewText(latestReview.review);
+              setReviewText(latestReview.comment || "");
             }
           }
         }
       } catch (err) {
         console.error("Failed to fetch review:", err);
+        toast.error("❌ Failed to fetch review");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -56,39 +66,61 @@ const EditReviewPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!review) return alert("❌ No review selected");
+    if (!review) return toast.error("❌ No review selected");
 
     try {
-      await fetch(`http://localhost:3000/reviews/${review._id}`, {
+      const res = await fetch(`https://my-scholarship-server.vercel.app/reviews/${review._id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ review: reviewText }),
+        body: JSON.stringify({ comment: reviewText }),
       });
 
-      alert("✅ Review updated!");
-      navigate("/dashboard/user/application-details"); // redirect after edit
+      const data = await res.json();
+      if (data?._id || data?.id) {
+        toast.success("✅ Review updated successfully!");
+        navigate("/dashboard/user/application-details");
+      } else {
+        toast.error("❌ Failed to update review");
+      }
     } catch (err) {
       console.error("Failed to update review:", err);
-      alert("❌ Failed to update review");
+      toast.error("❌ Failed to update review");
     }
   };
 
-  if (!review) return <p>❌ No review selected</p>;
+  if (loading)
+    return (
+      <div className="flex justify-center mt-20">
+        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+
+  if (!review)
+    return (
+      <p className="text-center mt-10 text-red-500">
+        ❌ No review selected
+      </p>
+    );
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 p-6 border rounded shadow">
-      <h2 className="text-2xl font-bold mb-4">Edit Review</h2>
-      <form onSubmit={handleSubmit} className="mt-4">
-        <textarea
-          value={reviewText}
-          onChange={(e) => setReviewText(e.target.value)}
-          className="w-full p-2 border rounded"
-          rows={5}
-          required
-        />
+    <div className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded-2xl shadow-lg">
+      <h2 className="text-3xl font-bold mb-6 text-center">Edit Review</h2>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block mb-2 font-semibold">Your Review:</label>
+          <textarea
+            value={reviewText}
+            onChange={(e) => setReviewText(e.target.value)}
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+            rows={5}
+            required
+          />
+        </div>
+
         <button
           type="submit"
-          className="mt-4 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+          className="w-full bg-gradient-to-r from-green-600 to-teal-600 text-white py-3 rounded-lg hover:opacity-90 transition"
         >
           Update Review
         </button>
@@ -98,4 +130,5 @@ const EditReviewPage = () => {
 };
 
 export default EditReviewPage;
+
 

@@ -1,43 +1,60 @@
+// ManageUsers.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useAuth } from "./AuthContext"; // ✅ adjust path
 
 const ManageUsers = () => {
+  const { user, loading: authLoading } = useAuth(); // Firebase user
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
+
+  // Helper: get token safely
+  const getToken = async () => {
+    if (!user) throw new Error("User not authenticated");
+    return await user.getIdToken();
+  };
 
   // Fetch users from server
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:3000/users");
+      const token = await getToken();
+
+      const res = await axios.get("https://my-scholarship-server.vercel.app/users", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       setUsers(res.data);
-      setLoading(false);
     } catch (err) {
       console.error(err);
       toast.error("Failed to fetch users");
+    } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
   // Change user role
   const changeRole = async (id, role) => {
     try {
+      const token = await getToken();
+
       const res = await axios.patch(
-        `http://localhost:3000/users/${id}`,
+        `https://my-scholarship-server.vercel.app/users/${id}`,
         { role },
-        { headers: { "Content-Type": "application/json" } }
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (res.data.success) {
         toast.success("Role updated successfully!");
-        fetchUsers(); // refresh users from server
+        fetchUsers(); // refresh
       }
     } catch (err) {
       console.error(err);
@@ -48,7 +65,12 @@ const ManageUsers = () => {
   // Delete user
   const deleteUser = async (id) => {
     try {
-      const res = await axios.delete(`http://localhost:3000/users/${id}`);
+      const token = await getToken();
+
+      const res = await axios.delete(`https://my-scholarship-server.vercel.app/users/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       if (res.data.success) {
         toast.success("User deleted successfully");
         fetchUsers();
@@ -61,9 +83,14 @@ const ManageUsers = () => {
     }
   };
 
-  const filteredUsers = filter
-    ? users.filter((u) => u.role === filter)
-    : users;
+  // Only fetch after auth is ready
+  useEffect(() => {
+    if (!authLoading && user) {
+      fetchUsers();
+    }
+  }, [authLoading, user]);
+
+  const filteredUsers = filter ? users.filter((u) => u.role === filter) : users;
 
   if (loading) return <p className="text-center mt-10">Loading users...</p>;
 

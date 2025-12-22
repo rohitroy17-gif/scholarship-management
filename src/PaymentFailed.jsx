@@ -7,7 +7,7 @@ const PaymentFailed = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      const res = await fetch(`http://localhost:3000/applications/${id}`);
+      const res = await fetch(`https://my-scholarship-server.vercel.app/applications/${id}`);
       const data = await res.json();
       setApplication(data);
     };

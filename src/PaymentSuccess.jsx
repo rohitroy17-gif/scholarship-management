@@ -10,7 +10,7 @@ const PaymentSuccess = () => {
 
   const fetchApp = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/applications/${appId}`);
+      const res = await fetch(`https://my-scholarship-server.vercel.app/applications/${appId}`);
       const data = await res.json();
       setApplication(data);
     } catch (err) {

@@ -16,11 +16,11 @@ const UserDashboard = () => {
   useEffect(() => {
     // Fetch applications and reviews from backend
     const fetchData = async () => {
-      const appsRes = await fetch("http://localhost:3000/applications");
+      const appsRes = await fetch("https://my-scholarship-server.vercel.app/applications");
       const appsData = await appsRes.json();
       setApplications(appsData);
 
-      const revRes = await fetch("http://localhost:3000/reviews");
+      const revRes = await fetch("https://my-scholarship-server.vercel.app/reviews");
       const revData = await revRes.json();
       setReviews(revData);
     };

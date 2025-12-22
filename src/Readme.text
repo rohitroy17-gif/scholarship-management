@@ -1,0 +1,95 @@
+# 🎓 ScholarStream – Scholarship Management System
+
+## 📌 Project Purpose
+ScholarStream is a full-stack scholarship management web application designed to help students apply for scholarships, admins manage users and scholarships, and moderators review applications efficiently.  
+The platform supports role-based access (Student, Moderator, Admin) with secure data handling and modern UI.
+
+---
+
+## 🌐 Live URL
+🔗 **Frontend:** https://your-frontend-live-url.com  
+🔗 **Backend API:** https://your-backend-live-url.com  
+
+> (Replace with your actual deployed URLs)
+
+---
+
+## ✨ Key Features
+
+### 👤 User Management
+- User registration & login
+- Role-based access control (Student, Moderator, Admin)
+- Admin can promote/demote users
+- Admin can delete users
+
+### 🎓 Scholarship Management
+- View all scholarships
+- Add & delete scholarships (Admin/Moderator)
+- View scholarship details
+
+### 📝 Applications
+- Students can apply for scholarships
+- Application fee payment using Stripe
+- View application details
+- Track application status
+
+### ⭐ Reviews
+- Add reviews for scholarships
+- View & delete reviews
+
+### 💳 Payment Integration
+- Stripe Checkout for secure payments
+- Success & cancel redirects
+
+### 🎨 UI & UX
+- Responsive design
+- Clean admin dashboard
+- Toast notifications
+- Loading states
+- Modern table layouts
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+- **React**
+- **Vite**
+- **Axios**
+- **React Router DOM**
+- **React Toastify**
+- **Tailwind CSS**
+- **Framer Motion**
+- **Lucide React**
+
+### Backend
+- **Node.js**
+- **Express.js**
+- **MongoDB (Atlas)**
+- **Stripe**
+- **CORS**
+- **dotenv**
+
+---
+
+## 📦 NPM Packages Used
+
+### Frontend Packages
+```bash
+npm install react react-dom
+npm install axios
+npm install react-router-dom
+npm install react-toastify
+npm install framer-motion
+npm install lucide-react
+npm install tailwindcss
+
+
+###Backend Packages
+
+npm install express
+npm install mongodb
+npm install cors
+npm install stripe
+npm install dotenv
+npm install nodemon

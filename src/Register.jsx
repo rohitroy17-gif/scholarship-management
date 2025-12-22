@@ -2,16 +2,16 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useAuth } from "./AuthContext"; // ✅ Correct hook
+import { useAuth } from "./AuthContext";
 
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [photoURL, setPhotoURL] = useState(""); // New photo URL field
-  const [password, setPassword] = useState(""); // New password field
+  const [photoURL, setPhotoURL] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const { login } = useAuth(); // Use login from AuthContext
+  const { login } = useAuth();
 
   const handleRegister = (e) => {
     e.preventDefault();
@@ -22,71 +22,112 @@ const Register = () => {
     }
 
     try {
-      // Create a new user object
       const newUser = {
-        id: Date.now().toString(), // Unique ID
+        id: Date.now().toString(),
         name,
         email,
-        password, // Store password for demo (not secure for production)
-        role: "user", // Default role
-        photoURL: photoURL || "https://i.ibb.co/album/default-user.png", // Fallback image
+        password,
+        role: "user",
+        photoURL:
+          photoURL || "https://i.ibb.co/album/default-user.png",
       };
 
-      login(newUser); // Log in immediately after registration
+      login(newUser);
       toast.success("Registered successfully!");
-      navigate("/dashboard"); // Redirect after registration
+      navigate("/dashboard");
     } catch (err) {
-      console.error(err);
-      toast.error(err.message || "Registration failed");
+      toast.error("Registration failed");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-6 border rounded shadow">
-      <h2 className="text-2xl font-bold mb-4 text-center">Register</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-700">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
+          Create Account
+        </h2>
+        <p className="text-center text-gray-500 mb-6">
+          Join us and explore opportunities
+        </p>
 
-      <form onSubmit={handleRegister} className="flex flex-col gap-4">
-        <input
-          type="text"
-          placeholder="Full Name"
-          className="border p-2 rounded"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          className="border p-2 rounded"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Photo URL (optional)"
-          className="border p-2 rounded"
-          value={photoURL}
-          onChange={(e) => setPhotoURL(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="border p-2 rounded"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button
-          type="submit"
-          className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
-        >
-          Register
-        </button>
-      </form>
+        <form onSubmit={handleRegister} className="space-y-4">
+          <div>
+            <label className="text-sm font-medium text-gray-600">
+              Full Name
+            </label>
+            <input
+              type="text"
+              placeholder="John Doe"
+              className="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-gray-600">
+              Email Address
+            </label>
+            <input
+              type="email"
+              placeholder="example@email.com"
+              className="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-gray-600">
+              Photo URL (Optional)
+            </label>
+            <input
+              type="text"
+              placeholder="https://image-link.com"
+              className="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              value={photoURL}
+              onChange={(e) => setPhotoURL(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-gray-600">
+              Password
+            </label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              className="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-300"
+          >
+            Register
+          </button>
+        </form>
+
+        <p className="text-center text-sm text-gray-500 mt-6">
+          Already have an account?{" "}
+          <span
+            onClick={() => navigate("/login")}
+            className="text-blue-600 font-medium cursor-pointer hover:underline"
+          >
+            Login
+          </span>
+        </p>
+      </div>
     </div>
   );
 };
 
 export default Register;
+
 

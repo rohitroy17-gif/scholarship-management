@@ -7,7 +7,7 @@ const AddReviewModal = ({ application, onClose }) => {
   if (!application) return null;
 
   const handleSubmit = async () => {
-    await fetch("http://localhost:3000/reviews", {
+    await fetch("https://my-scholarship-server.vercel.app/reviews", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

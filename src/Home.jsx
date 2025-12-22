@@ -1,110 +1,165 @@
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { NavLink, useNavigate } from "react-router";
-import ContactForm from "./ContactForm"; // Make sure this path is correct
+import ContactForm from "./ContactForm";
 
 const HomePage = () => {
   const [scholarships, setScholarships] = useState([]);
   const navigate = useNavigate();
 
-  // Fetch top scholarships
   useEffect(() => {
-    fetch("http://localhost:3000/scholarships")
+    fetch("https://my-scholarship-server.vercel.app/scholarships")
       .then((res) => res.json())
       .then((data) => {
-        const sorted = data.sort((a, b) => a.applicationFees - b.applicationFees);
+        const sorted = data.sort(
+          (a, b) => (a.applicationFees || 0) - (b.applicationFees || 0)
+        );
         setScholarships(sorted.slice(0, 6));
       })
-      .catch((err) => console.error(err));
+      .catch(console.error);
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto p-4">
-      {/* Hero Banner */}
-      <motion.section
-        className="bg-blue-600 text-white rounded-lg p-10 mb-12 text-center"
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        <h1 className="text-4xl font-bold mb-4">Find Your Perfect Scholarship</h1>
-        <p className="mb-6 text-lg">
-          Explore scholarships worldwide to fund your studies and achieve your dreams.
-        </p>
-        <NavLink to="/scholarships"><button
-          onClick={() => navigate("/all-scholarships")}
-          className="bg-white text-blue-600 font-semibold px-6 py-3 rounded hover:bg-gray-100 transition"
-        >
-          Search Scholarship
-        </button></NavLink>
-      </motion.section>
+    <div className="min-h-screen bg-slate-50">
+      <div className="max-w-7xl mx-auto px-4 py-10">
 
-      {/* Top Scholarships */}
-      <section className="mb-12">
-        <h2 className="text-3xl font-bold mb-6 text-center">Top Scholarships</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {scholarships.map((sch) => (
-            <motion.div
-              key={sch._id}
-              className="border rounded shadow hover:shadow-lg p-4 flex flex-col"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              <img
-                src={sch.universityImage || "/default-university.png"}
-                alt={sch.universityName}
-                className="w-full h-40 object-cover rounded mb-4"
-              />
-              <h3 className="text-xl font-semibold">{sch.universityName}</h3>
-              <p className="text-gray-600">{sch.scholarshipCategory}</p>
-              <p className="text-gray-600">{sch.universityCity}, {sch.universityCountry}</p>
-              <p className="text-gray-600 font-semibold">Tuition Fees: ${sch.tuitionFees}</p>
-              {sch.applicationFees > 0 && (
-                <p className="text-red-500 font-semibold">Application Fees: ${sch.applicationFees}</p>
-              )}
-              <button
-                className="mt-auto px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                onClick={() => navigate(`/scholarship/${sch._id}`)}
-              >
-                View Details
+        {/* ================= HERO ================= */}
+        <section className="relative mt-20 mb-24 rounded-3xl bg-gradient-to-br from-indigo-700 via-blue-700 to-purple-700 text-white overflow-hidden shadow-2xl">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.15),transparent_60%)]" />
+
+          <div className="relative z-10 text-center py-24 px-6">
+            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 to-pink-300">
+                Your Future
+              </span>{" "}
+              Starts With a Scholarship
+            </h1>
+
+            <p className="max-w-2xl mx-auto text-lg text-blue-100 mb-10">
+              Discover top universities worldwide and unlock opportunities
+              that shape your academic journey.
+            </p>
+
+            <NavLink to="/scholarships">
+              <button className="px-10 py-4 rounded-full bg-gradient-to-r from-yellow-400 to-pink-400 text-gray-900 font-bold shadow-lg hover:scale-105 hover:shadow-2xl transition">
+                Explore Scholarships
               </button>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+            </NavLink>
+          </div>
+        </section>
 
-      {/* Success Stories / Testimonials */}
-      <section className="mb-12 p-6 bg-gray-100 rounded">
-        <h2 className="text-3xl font-bold mb-6 text-center">Success Stories</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {["Jane Doe", "John Smith", "Clark Adams"].map((name, idx) => (
-            <motion.div
-              key={idx}
-              className="border p-4 rounded shadow"
-              whileHover={{ scale: 1.05 }}
-            >
-              <p className="text-gray-700">
-                {idx === 0 && `"Thanks to the Global Excellence Scholarship, I completed my Masters at Harvard!"`}
-                {idx === 1 && `"This scholarship helped me achieve my dream in Computer Science."`}
-                {idx === 2 && `"These scholarships open doors to world-class education and life-changing opportunities."`}
-              </p>
-              <p className="mt-2 font-semibold">— {name}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+        {/* ================= FEATURED SCHOLARSHIPS ================= */}
+        <section className="mb-24 bg-white rounded-3xl py-16 px-6 shadow-sm">
+          <h2 className="text-4xl font-extrabold text-center mb-14">
+            Featured Scholarships
+          </h2>
 
-      {/* Contact Us */}
-      <section className="mb-12 p-6 bg-blue-50 rounded">
-        <h2 className="text-3xl font-bold mb-6 text-center">Contact Us</h2>
-        <ContactForm />
-      </section>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            {scholarships.map((sch) => (
+              <div
+                key={sch._id}
+                className="group rounded-2xl overflow-hidden bg-white shadow-lg hover:-translate-y-3 hover:shadow-2xl transition-all duration-300"
+              >
+                {/* Image */}
+                <div className="relative overflow-hidden">
+                  <img
+                    src={sch.universityImage || "/default-university.png"}
+                    alt={sch.universityName}
+                    className="h-52 w-full object-cover group-hover:scale-110 transition duration-500"
+                  />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition bg-gradient-to-tr from-white/0 via-white/30 to-white/0" />
+                </div>
+
+                {/* Content */}
+                <div className="p-6 space-y-2">
+                  <h3 className="text-xl font-bold text-gray-800">
+                    {sch.universityName}
+                  </h3>
+
+                  <p className="text-sm text-gray-500">
+                    {sch.universityCity}, {sch.universityCountry}
+                  </p>
+
+                  <span className="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-indigo-100 text-indigo-700">
+                    {sch.scholarshipCategory}
+                  </span>
+
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    <span className="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-700">
+                      Tuition: ${sch.tuitionFees || 0}
+                    </span>
+
+                    {sch.applicationFees > 0 && (
+                      <span className="px-3 py-1 text-sm font-semibold rounded-full bg-red-100 text-red-600">
+                        App Fee: ${sch.applicationFees}
+                      </span>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => navigate(`/scholarship/${sch._id}`)}
+                    className="w-full mt-5 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-purple-600 transition"
+                  >
+                    View Details →
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ================= SUCCESS STORIES ================= */}
+        <section className="mb-24 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-3xl p-16">
+          <h2 className="text-4xl font-extrabold text-center mb-14">
+            Student Success Stories
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            {[
+              {
+                name: "Jane Doe",
+                text: "This scholarship completely changed my life and career path.",
+              },
+              {
+                name: "John Smith",
+                text: "I studied abroad without financial stress. Incredible experience.",
+              },
+              {
+                name: "Clark Adams",
+                text: "The platform made finding scholarships simple and fast.",
+              },
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition"
+              >
+                <p className="text-gray-700 italic leading-relaxed">
+                  “{item.text}”
+                </p>
+                <div className="mt-6 font-bold text-indigo-600">
+                  — {item.name}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ================= CONTACT ================= */}
+        <section className="mb-10 rounded-3xl bg-gradient-to-r from-sky-50 to-indigo-100 p-16 shadow-inner">
+          <h2 className="text-4xl font-extrabold text-center mb-10">
+            Get in Touch
+          </h2>
+          <ContactForm />
+        </section>
+
+      </div>
     </div>
   );
 };
 
 export default HomePage;
+
+
+
 
 
 
