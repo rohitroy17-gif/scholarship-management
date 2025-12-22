@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { toast } from "react-toastify";
-
+//addreview 
 const AddReviewPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
