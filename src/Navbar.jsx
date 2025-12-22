@@ -5,7 +5,7 @@ import { Menu, X } from "lucide-react";
 import { useAuth } from "./AuthContext";
 import logo from "./assets/images.jpg";
 import defaultAdmin from "./assets/default-admin.png";
-
+//navbar
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [dropdown, setDropdown] = useState(false);
